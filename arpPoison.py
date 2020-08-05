@@ -52,6 +52,16 @@ def getDefaultGateway(output):
 		currLine = output.stdout.readline().decode('utf-8')
 
 
+def togglePortForward(t):
+	'''
+	Toggles port forwarding on local, attacking machine
+
+	Keyword Arguments:
+	t - set to 1 enables, cleared to 0 disables
+	'''
+	fwdCmd = 'net.ipv4.ip_forward=' + str(t)
+	subprocess.call(['sysctl', '-w', fwdCmd])
+
 def enablePortForward():
 	'''
 	Enables port forwarding on the local, attacking machine

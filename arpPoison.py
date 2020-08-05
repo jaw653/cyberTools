@@ -12,7 +12,7 @@ import os
 import sys
 import subprocess
 from subprocess import Popen, PIPE
-
+import scapy.all as scap
 
 def extractIP(line):
 	'''
@@ -52,6 +52,20 @@ def getDefaultGateway(output):
 		currLine = output.stdout.readline().decode('utf-8')
 
 
+def enablePortForward():
+	'''
+	Enables port forwarding on the local, attacking machine
+	'''
+	subprocess.call(['sysctl', '-w', 'net.ipv4.ip_forward=1'])
+
+
+def disablePortForward():
+	'''
+	Disables port forwarding on the local, attacking machine
+	'''
+	subprocess.call(['sysctl', '-w', 'net.ipv4.ip_forward=0'])
+
+
 if __name__ == '__main__':
 	if len(sys.argv) < 2:
 		print('Usage: python3 arpPoison.py <target_IP_address>')
@@ -65,5 +79,8 @@ if __name__ == '__main__':
 		except:
 			print('No default gateway could be found')		# FIXME: print to stderr
 			exit()
-
-		print('gateway ip is: ', gateway_ip)
+		
+		# enable port forwarding on local attacker machine
+		# begin sending arp packets (notify user)
+		# if user types quit, etc. stop sending packets, disable port forwarding, and exit
+		

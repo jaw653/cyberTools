@@ -103,11 +103,6 @@ if __name__ == '__main__':
 	print('Scanning ' + interfaces[int(choice)] + '...')
 
 	ip = netifaces.ifaddresses(interfaces[int(choice)])[netifaces.AF_INET][0]['addr']
-	'''
-	allDown = None
-	upText = None
-	downText = None
-	'''
 
 	[upHosts, noResponse, failedPing] = scan(24, ip) # FIXME: change this number to 255
 	
@@ -125,39 +120,3 @@ if __name__ == '__main__':
 		print('upHosts: ', upHosts)
 		print('noResponse: ', noResponse)
 		print('failedPing: ', failedPing)
-'''
-while True:
-	sh = input('ghostScan>>')
-	
-	if sh == 'quit' or sh == 'q':
-		break
-
-	elif sh == '--help' or sh == '-h' or sh == 'help':
-		print('Options: scan, up/uphosts, down/downhosts, file, q/quit')
-
-	elif sh == 'scan' or sh == 's':
-		rn = input('What is the max number of the last digit in the IP (0-255):')
-		scan(rn)
-
-	elif sh == 'up' or sh == 'uphosts':
-		print(upText)
-
-	elif sh == 'down' or sh == 'downhosts':
-		print(downText)
-
-	elif sh == 'file':
-		filename = input('Enter filename to write:')
-		fp = open(filename, 'w')
-
-		fp.write('Up hosts:')
-		fp.write(str(upHosts) + '\n\n')
-
-		fp.write('Hosts that did not respond:')
-		fp.write(str(noResponse) + '\n\n')
-
-		fp.write('Failed pings to:')
-		fp.write(str(failedPing))
-
-		fp.close()
-'''	
-

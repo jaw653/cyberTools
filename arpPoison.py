@@ -3,7 +3,16 @@ Author: Jake Wachs
 Aug 2020
 
 A Python script for Linux that automates
-the boring parts of ARP Poisoning
+the boring parts of ARP Poisoning.
+
+All you need is victim IP, arpPoison does the rest!
+
+Usage: sudo python3 arpPoison.py <victim_ip>
+
+***NOTE: I do NOT condone usage of this script for
+ANYTHING besides educational and/or legal endeavors.
+If you use this for malicious purposes, I hope you
+get caught.***
 '''
 
 import re

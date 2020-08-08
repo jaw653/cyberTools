@@ -15,6 +15,11 @@ If you use this for malicious purposes, I hope you
 get caught.***
 '''
 
+'''
+TODO:
+ - fix output so that it still prints red disabling port forwarding
+'''
+
 import re
 import os
 import sys

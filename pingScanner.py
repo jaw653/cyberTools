@@ -64,17 +64,17 @@ def scan(r, ip):
 		DNULL = open(os.devnull, 'w')
 		output = subprocess.call(['ping', '-c', '2', addr], stdout=DNULL, stderr=subprocess.STDOUT)
 		if output == 0:
-			text = colored(addr + ' host is UP!', 'green')
+			text = colored('[+] ' + addr + ' host is UP!', 'green')
 			print(text)
 			upHosts.append(addr)
 
 		elif output == 2:
-			text = colored('No response from ' + addr, 'yellow')
+			text = colored('[*] ' + 'No response from ' + addr, 'yellow')
 			print(text)
 			noResponse.append(addr) 
 
 		else:
-			text = colored('Ping to ' +  addr + ' failed' )
+			text = colored('[-] ' + 'Ping to ' +  addr + ' failed' )
 			failedPing.append(addr)
 			print(text)
 

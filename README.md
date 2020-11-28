@@ -8,7 +8,7 @@ Makes it much easier to add a newly downloaded exploit to the metasploit reposit
 This tool executes automated ARP poisoning
 
 ## makeasm
-Bash script to compile an assembly file into a binary. Takes the .asm file as input
+Bash script to compile an assembly file into a binary. Takes the .asm file as input; must already have nasm installed.
 
 ## pingScanner
 A python utility using PING to scan the local network

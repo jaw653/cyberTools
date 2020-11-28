@@ -1,0 +1,8 @@
+#! /bin/bash
+
+LEN=${#1}
+CUT_LEN=$(($LEN-4))
+SUBSTRING=$(echo $1 | cut -c1-$((CUT_LEN)))
+
+nasm -f elf $1 -o $SUBSTRING.o
+ld -m elf_i386 $SUBSTRING.o -o $SUBSTRING

@@ -7,6 +7,9 @@ Makes it much easier to add a newly downloaded exploit to the metasploit reposit
 ## arpPoison
 This tool executes automated ARP poisoning
 
+## makeasm
+Bash script to compile an assembly file into a binary. Takes the .asm file as input
+
 ## pingScanner
 A python utility using PING to scan the local network
 

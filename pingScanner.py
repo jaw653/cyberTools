@@ -1,6 +1,5 @@
 '''
-Author: Jake Wachs
-Crimson Defense - 2019
+
 '''
 
 '''

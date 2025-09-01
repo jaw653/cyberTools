@@ -1,7 +1,4 @@
 '''
-Author: Jake Wachs
-Aug 2020
-
 A Python script for Linux that automates
 the boring parts of ARP Poisoning.
 
